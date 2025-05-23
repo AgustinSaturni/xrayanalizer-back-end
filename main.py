@@ -39,6 +39,23 @@ class ProjectUpdate(BaseModel):
     imageCount: Optional[int] = None
     reportCount: Optional[int] = None
 
+# Modelo para los ángulos
+class Angle(BaseModel):
+    name: str
+    value: str
+
+# Modelo para un reporte
+class Report(BaseModel):
+    id: int
+    projectName: str
+    patientId: str
+    date: str
+    imageCount: int
+    projectId: str
+    angles: List[Angle]
+    notes: str
+
+
 # Simulación de una base de datos en memoria
 projects = [
     Project(
@@ -69,6 +86,87 @@ projects = [
         reportCount=0
     ),
 ]
+
+# Simulación de base de datos de reportes
+reports = [
+    Report(
+        id=1,
+        projectName="Paciente A - Evaluación Inicial",
+        patientId="PAC-001",
+        date="15/04/2025",
+        imageCount=3,
+        projectId="1",
+        angles=[
+            Angle(name="Ángulo de Hallux Valgus", value="23°"),
+            Angle(name="Ángulo Intermetatarsiano", value="12°"),
+            Angle(name="Ángulo PASA", value="8°"),
+            Angle(name="Ángulo DASA", value="6°"),
+        ],
+        notes="El paciente presenta un hallux valgus moderado en el pie derecho.",
+    ),
+    Report(
+        id=2,
+        projectName="Paciente A - Evaluación Inicial",
+        patientId="PAC-001",
+        date="15/04/2025",
+        imageCount=1,
+        projectId="1",
+        angles=[
+            Angle(name="Ángulo de Hallux Valgus", value="18°"),
+            Angle(name="Ángulo Intermetatarsiano", value="10°"),
+            Angle(name="Ángulo PASA", value="7°"),
+            Angle(name="Ángulo DASA", value="5°"),
+        ],
+        notes="Seguimiento del paciente A, se observa mejoría.",
+    ),
+    Report(
+        id=3,
+        projectName="Paciente B - Seguimiento",
+        patientId="PAC-002",
+        date="10/04/2025",
+        imageCount=2,
+        projectId="2",
+        angles=[
+            Angle(name="Ángulo de Hallux Valgus", value="15°"),
+            Angle(name="Ángulo Intermetatarsiano", value="9°"),
+            Angle(name="Ángulo PASA", value="6°"),
+            Angle(name="Ángulo DASA", value="4°"),
+        ],
+        notes="Evaluación de seguimiento del paciente B.",
+    ),
+    Report(
+        id=4,
+        projectName="Paciente C - Post-operatorio",
+        patientId="PAC-003",
+        date="05/04/2025",
+        imageCount=4,
+        projectId="3",
+        angles=[
+            Angle(name="Ángulo de Hallux Valgus", value="8°"),
+            Angle(name="Ángulo Intermetatarsiano", value="7°"),
+            Angle(name="Ángulo PASA", value="5°"),
+            Angle(name="Ángulo DASA", value="3°"),
+        ],
+        notes="Evaluación post-operatoria, resultados satisfactorios.",
+    ),
+    Report(
+        id=5,
+        projectName="Paciente D - Evaluación Pre-quirúrgica",
+        patientId="PAC-004",
+        date="01/04/2025",
+        imageCount=2,
+        projectId="4",
+        angles=[
+            Angle(name="Ángulo de Hallux Valgus", value="28°"),
+            Angle(name="Ángulo Intermetatarsiano", value="15°"),
+            Angle(name="Ángulo PASA", value="10°"),
+            Angle(name="Ángulo DASA", value="8°"),
+        ],
+        notes="Evaluación pre-quirúrgica, se recomienda intervención.",
+    ),
+]
+
+
 # Endpoint para obtener todos los proyectos
 @app.get("/projects", response_model=List[Project])
 def get_projects():
@@ -90,7 +188,6 @@ def create_project(project_data: ProjectCreate):
     )
     projects.append(new_project)
     return new_id
-
 
 
 # 🆕 Obtener un proyecto por ID
@@ -127,3 +224,9 @@ def delete_project(project_id: str):
             return True
     print("Proyecto no encontrado para eliminar con ID:", project_id)
     raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+
+
+# Endpoint para obtener todos los reportes
+@app.get("/reports", response_model=List[Report])
+def get_reports():
+    return reports
