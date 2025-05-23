@@ -114,3 +114,16 @@ def update_project(project_id: str, project_data: ProjectUpdate):
             return updated_project
     print("Proyecto no encontrado:", project_id)
     raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+
+
+# 🗑️ Eliminar un proyecto por ID
+@app.delete("/projects/{project_id}", response_model=bool)
+def delete_project(project_id: str):
+    print("Eliminando proyecto con ID:", project_id)
+    for index, project in enumerate(projects):
+        if project.id == project_id:
+            deleted_project = projects.pop(index)
+            print("Proyecto eliminado:", deleted_project)
+            return True
+    print("Proyecto no encontrado para eliminar con ID:", project_id)
+    raise HTTPException(status_code=404, detail="Proyecto no encontrado")
