@@ -26,10 +26,11 @@ class ReportCreate(BaseModel):
     notes: str
 
 class ReportUpdate(BaseModel):
-    projectId: Optional[str]
-    projectName: Optional[str]
-    patientId: Optional[str]
-    name: Optional[str]
-    imageCount: Optional[int]
-    angles: Optional[List[Angle]]
-    notes: Optional[str]
+    projectId: Optional[str] = None
+    projectName: Optional[str] = None
+    patientId: Optional[str] = None
+    name: Optional[str] = None
+    imageCount: Optional[int] = None
+    angles: Optional[List[Angle]] = None
+    notes: Optional[str] = None
+

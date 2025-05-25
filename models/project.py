@@ -13,9 +13,9 @@ class Project(ProjectCreate):
     reportCount: int
 
 class ProjectUpdate(BaseModel):
-    name: Optional[str]
-    patientId: Optional[str]
-    description: Optional[str]
-    date: Optional[str]
-    imageCount: Optional[int]
-    reportCount: Optional[int]
+    name: Optional[str] = None
+    patientId: Optional[str] = None
+    description: Optional[str] = None
+    date: Optional[str] = None
+    imageCount: Optional[int] = None
+    reportCount: Optional[int] = None
