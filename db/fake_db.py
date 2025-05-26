@@ -115,3 +115,6 @@ reports = [
         notes="Evaluación pre-quirúrgica, se recomienda intervención.",
     ),
 ]
+
+# Simulacion de base de datos de imagenes
+images_db = []  
