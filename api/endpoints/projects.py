@@ -1,14 +1,25 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException,Depends
 from models.project import Project, ProjectCreate, ProjectUpdate
 from db.fake_db import projects
 from datetime import datetime
 import time
+from sqlalchemy.orm import Session
+from db.database import SessionLocal
+from models.project import Project, ProjectORM
 
 router = APIRouter()
 
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 @router.get("", response_model=list[Project])
-def get_projects():
-    return projects
+def get_projects(db: Session = Depends(get_db)):
+    return db.query(ProjectORM).all()
 
 @router.post("", response_model=str)
 def create_project(project_data: ProjectCreate):

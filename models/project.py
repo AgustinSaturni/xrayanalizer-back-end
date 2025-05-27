@@ -1,16 +1,39 @@
-from pydantic import BaseModel
+# models/project.py
+from sqlalchemy import Column, Integer, String, Date
+from db.database import Base
+from pydantic import BaseModel,Field
 from typing import Optional
+
+class ProjectORM(Base):
+    __tablename__ = "proyecto"
+
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    patient_id = Column(String, nullable=False)
+    date = Column(Date, nullable=False)
+    description = Column(String)
+    image_count = Column(Integer, default=0)
+    report_count = Column(Integer, default=0)
 
 class ProjectCreate(BaseModel):
     name: str
-    patientId: str
+    patientId: str = Field(..., alias="patient_id")
     description: str
 
-class Project(ProjectCreate):
+class Project(BaseModel):
     id: str
+    name: str
+    patient_id: str = Field(..., alias="patientId")
+    description: str
     date: str
-    imageCount: int
-    reportCount: int
+    image_count: int = Field(..., alias="imageCount")
+    report_count: int = Field(..., alias="reportCount")
+
+    class Config:
+        orm_mode = True
+        populate_by_name = True  # <-- para salida en camelCase
+        allow_population_by_field_name = True  # <-- para entrada en camelCase
+
 
 class ProjectUpdate(BaseModel):
     name: Optional[str] = None
