@@ -5,6 +5,7 @@ from db.fake_db import images_db
 from datetime import datetime
 import base64
 import uuid
+from db.fake_db import projects
 
 router = APIRouter()
 
@@ -37,8 +38,24 @@ async def get_project_images(project_id: str):
 
 @router.delete("/{image_id}")
 async def delete_image(image_id: str):
+    # Buscar imagen
+    image_to_delete = None
     for img in images_db:
         if img.id == image_id:
-            images_db.remove(img)
-            return {"detail": "Imagen eliminada correctamente"}
-    raise HTTPException(status_code=404, detail="Imagen no encontrada")
+            image_to_delete = img
+            break
+
+    if not image_to_delete:
+        raise HTTPException(status_code=404, detail="Imagen no encontrada")
+
+    # Eliminar imagen
+    images_db.remove(image_to_delete)
+
+    # Actualizar contador de imágenes en proyecto
+    for project in projects:
+        if project.id == image_to_delete.projectId:
+            if project.imageCount > 0:
+                project.imageCount -= 1
+            break
+
+    return {"detail": "Imagen eliminada correctamente"}
