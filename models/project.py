@@ -7,7 +7,7 @@ from typing import Optional
 class ProjectORM(Base):
     __tablename__ = "proyecto"
 
-    id = Column(String, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     patient_id = Column(String, nullable=False)
     date = Column(Date, nullable=False)
@@ -21,7 +21,7 @@ class ProjectCreate(BaseModel):
     description: str
 
 class Project(BaseModel):
-    id: str
+    id: int
     name: str
     patient_id: str = Field(..., alias="patientId")
     description: str
