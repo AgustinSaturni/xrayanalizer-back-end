@@ -38,11 +38,11 @@ def create_project(project_data: ProjectCreate):
 
 # 🆕 Obtener un proyecto por ID
 @router.get("/{project_id}", response_model=Project)
-def get_project_by_id(project_id: str):
-    for project in projects:
-        if project.id == project_id:
-            return project
-    raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+def get_project_by_id(project_id: int, db: Session = Depends(get_db)):
+    project = db.query(ProjectORM).filter(ProjectORM.id == project_id).first()
+    if project is None:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    return project
 
 # 🆕 Actualizar un proyecto por ID
 @router.put("/{project_id}", response_model=Project)
