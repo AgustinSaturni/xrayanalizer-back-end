@@ -52,17 +52,21 @@ def get_project_by_id(project_id: int, db: Session = Depends(get_db)):
 
 # 🆕 Actualizar un proyecto por ID
 @router.put("/{project_id}", response_model=Project)
-def update_project(project_id: str, project_data: ProjectUpdate):
-    print("Actualizando proyecto con ID:", project_id)
-    for index, project in enumerate(projects):
-        if project.id == project_id:
-            updated_project = project.copy(update=project_data.dict(exclude_unset=True))
-            projects[index] = updated_project
-            print("Proyecto actualizado:", updated_project)
-            return updated_project
-    print("Proyecto no encontrado:", project_id)
-    raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+def update_project(project_id: int, project_data: ProjectUpdate, db: Session = Depends(get_db)):
+    # Buscar proyecto existente
+    project = db.query(ProjectORM).filter(ProjectORM.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
 
+    # Aplicar actualizaciones
+    update_data = project_data.dict(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(project, field, value)
+
+    db.commit()
+    db.refresh(project)
+    return project
 
 # 🗑️ Eliminar un proyecto por ID
 @router.delete("/{project_id}", response_model=bool)
