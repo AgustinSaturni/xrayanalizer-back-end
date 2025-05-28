@@ -70,12 +70,16 @@ def update_project(project_id: int, project_data: ProjectUpdate, db: Session = D
 
 # 🗑️ Eliminar un proyecto por ID
 @router.delete("/{project_id}", response_model=bool)
-def delete_project(project_id: str):
+def delete_project(project_id: int, db: Session = Depends(get_db)):
     print("Eliminando proyecto con ID:", project_id)
-    for index, project in enumerate(projects):
-        if project.id == project_id:
-            deleted_project = projects.pop(index)
-            print("Proyecto eliminado:", deleted_project)
-            return True
-    print("Proyecto no encontrado para eliminar con ID:", project_id)
-    raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+
+    project = db.query(ProjectORM).filter(ProjectORM.id == project_id).first()
+
+    if not project:
+        print("Proyecto no encontrado para eliminar con ID:", project_id)
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+
+    db.delete(project)
+    db.commit()
+    print("Proyecto eliminado:", project)
+    return True
