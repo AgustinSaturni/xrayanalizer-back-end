@@ -7,7 +7,7 @@ projects = [
         id="1",
         name="Paciente A - Evaluación Inicial",
         patientId="PAC-001",
-        date="15/04/2025",
+        date="2025-04-15",
         description="Evaluación inicial del paciente A",
         imageCount=0,
         reportCount=0
@@ -16,7 +16,7 @@ projects = [
         id="2",
         name="Paciente B - Seguimiento",
         patientId="PAC-002",
-        date="10/04/2025",
+        date="2025-04-10",
         description="Seguimiento del paciente B",
         imageCount=0,
         reportCount=0
@@ -25,7 +25,7 @@ projects = [
         id="3",
         name="Paciente C - Post-operatorio",
         patientId="PAC-003",
-        date="05/04/2025",
+        date="2025-04-05",
         description="Evaluación post-operatoria del paciente C",
         imageCount=0,
         reportCount=0
@@ -36,10 +36,10 @@ projects = [
 reports = [
     Report(
         id=1,
-        name= "nombre prueba 1",
+        name="nombre prueba 1",
         projectName="Paciente A - Evaluación Inicial",
         patientId="PAC-001",
-        date="15/04/2025",
+        date="2025-04-15",
         imageCount=3,
         projectId="1",
         angles=[
@@ -55,7 +55,7 @@ reports = [
         name="nombre prueba 2",
         projectName="Paciente A - Evaluación Inicial",
         patientId="PAC-001",
-        date="15/04/2025",
+        date="2025-04-15",
         imageCount=1,
         projectId="1",
         angles=[
@@ -68,10 +68,10 @@ reports = [
     ),
     Report(
         id=3,
-        name= "nombre prueba 3",
+        name="nombre prueba 3",
         projectName="Paciente B - Seguimiento",
         patientId="PAC-002",
-        date="10/04/2025",
+        date="2025-04-10",
         imageCount=2,
         projectId="2",
         angles=[
@@ -84,10 +84,10 @@ reports = [
     ),
     Report(
         id=4,
-        name= "nombre prueba 4",
+        name="nombre prueba 4",
         projectName="Paciente C - Post-operatorio",
         patientId="PAC-003",
-        date="05/04/2025",
+        date="2025-04-05",
         imageCount=4,
         projectId="3",
         angles=[
@@ -100,10 +100,10 @@ reports = [
     ),
     Report(
         id=5,
-        name= "nombre prueba 5",
+        name="nombre prueba 5",
         projectName="Paciente D - Evaluación Pre-quirúrgica",
         patientId="PAC-004",
-        date="01/04/2025",
+        date="2025-04-01",
         imageCount=2,
         projectId="4",
         angles=[
@@ -116,5 +116,5 @@ reports = [
     ),
 ]
 
-# Simulacion de base de datos de imagenes
-images_db = []  
+# Simulación de base de datos de imágenes
+images_db = []

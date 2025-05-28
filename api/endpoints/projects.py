@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException,Depends
 from models.project import Project, ProjectCreate, ProjectUpdate
 from db.fake_db import projects
-from datetime import datetime
+from datetime import date, datetime
 import time
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
@@ -21,20 +21,26 @@ def get_db():
 def get_projects(db: Session = Depends(get_db)):
     return db.query(ProjectORM).all()
 
+
 @router.post("", response_model=str)
-def create_project(project_data: ProjectCreate):
-    new_id = str(int(time.time() * 1000))
-    new_project = Project(
-        id=new_id,
+def create_project(project_data: ProjectCreate, db: Session = Depends(get_db)):
+    # Crear instancia del modelo ORM
+    new_project = ProjectORM(
         name=project_data.name,
-        patientId=project_data.patientId,
+        patient_id=project_data.patientId,
         description=project_data.description,
-        date=datetime.now().strftime("%d/%m/%Y"),
-        imageCount=0,
-        reportCount=0
+        date=date.today(),  # fecha de hoy como objeto date
+        image_count=0,
+        report_count=0
     )
-    projects.append(new_project)
-    return new_id
+    
+    # Agregar y guardar en base de datos
+    db.add(new_project)
+    db.commit()
+    db.refresh(new_project)
+
+    # Devolver el ID generado por la base de datos
+    return str(new_project.id)
 
 # 🆕 Obtener un proyecto por ID
 @router.get("/{project_id}", response_model=Project)

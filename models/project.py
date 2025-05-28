@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Date
 from db.database import Base
 from pydantic import BaseModel,Field
 from typing import Optional
+from datetime import date
 
 class ProjectORM(Base):
     __tablename__ = "proyecto"
@@ -25,7 +26,7 @@ class Project(BaseModel):
     name: str
     patient_id: str = Field(..., alias="patientId")
     description: str
-    date: str
+    date: date
     image_count: int = Field(..., alias="imageCount")
     report_count: int = Field(..., alias="reportCount")
 
