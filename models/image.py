@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 
+
 class Image(BaseModel):
     id: str
     projectId: str
@@ -9,3 +10,7 @@ class Image(BaseModel):
     type: str
     size: int
     uploadedAt: datetime
+
+    class Config:
+        from_attributes = True
+        validate_by_name = True

@@ -3,7 +3,9 @@ from sqlalchemy import Column, Integer, String, Date
 from db.database import Base
 from pydantic import BaseModel,Field
 from typing import Optional
-from datetime import date
+from datetime import date as dt_date
+from sqlalchemy.orm import relationship
+
 
 class ProjectORM(Base):
     __tablename__ = "proyecto"
@@ -16,6 +18,8 @@ class ProjectORM(Base):
     image_count = Column(Integer, default=0)
     report_count = Column(Integer, default=0)
 
+    reports = relationship("ReportORM", back_populates="project")
+
 class ProjectCreate(BaseModel):
     name: str
     patientId: str = Field(..., alias="patient_id")
@@ -26,14 +30,13 @@ class Project(BaseModel):
     name: str
     patient_id: str = Field(..., alias="patientId")
     description: str
-    date: date
+    date: dt_date
     image_count: int = Field(..., alias="imageCount")
     report_count: int = Field(..., alias="reportCount")
 
     class Config:
-        orm_mode = True
-        populate_by_name = True  # <-- para salida en camelCase
-        allow_population_by_field_name = True  # <-- para entrada en camelCase
+        from_attributes = True
+        validate_by_name = True
 
 
 class ProjectUpdate(BaseModel):
@@ -41,5 +44,5 @@ class ProjectUpdate(BaseModel):
     patientId: Optional[str] = None
     description: Optional[str] = None
     date: Optional[str] = None
-    imageCount: Optional[int] = None
+    imageCount: Optional[dt_date] = None
     reportCount: Optional[int] = None
