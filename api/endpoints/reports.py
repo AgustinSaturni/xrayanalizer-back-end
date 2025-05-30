@@ -50,11 +50,29 @@ def get_all_reports(db: Session = Depends(get_db)):
 
 # Endpoint para obtener un reporte por id
 @router.get("/{report_id}", response_model=Report)
-def get_report_by_id(report_id: int):
-    for report in reports:
-        if report.id == report_id:
-            return report
-    raise HTTPException(status_code=404, detail="Reporte no encontrado")
+def get_report_by_id(report_id: int, db: Session = Depends(get_db)):
+    report = db.query(ReportORM).filter(ReportORM.id == report_id).first()
+
+    if not report:
+        raise HTTPException(status_code=404, detail="Reporte no encontrado")
+
+    angles = [
+        Angle(name=m.angle.name, value=m.value)
+        for m in report.measurements
+    ]
+
+    return Report(
+        id=report.id,
+        name=report.name,
+        projectName=report.project.name if report.project else None,
+        patientId=report.patientid,
+        date=report.date,
+        imageCount=report.image_count,
+        projectId=report.projectid,
+        notes=report.notes,
+        angles=angles,
+    )
+
 
 # Endpoint para obtener todos los reportes asociados a un proyecto id
 @router.get("/by_project/{project_id}", response_model=List[Report])
