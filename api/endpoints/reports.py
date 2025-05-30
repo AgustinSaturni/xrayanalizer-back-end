@@ -76,9 +76,35 @@ def get_report_by_id(report_id: int, db: Session = Depends(get_db)):
 
 # Endpoint para obtener todos los reportes asociados a un proyecto id
 @router.get("/by_project/{project_id}", response_model=List[Report])
-def get_reports_by_project_id(project_id: str):
-    filtered_reports = [report for report in reports if report.projectId == project_id]
-    return filtered_reports
+def get_reports_by_project_id(project_id: int, db: Session = Depends(get_db)):
+    reports_orm = db.query(ReportORM).filter(ReportORM.projectid == project_id).all()
+
+    if not reports_orm:
+        raise HTTPException(status_code=404, detail="No hay reportes para este proyecto")
+
+    reports = []
+    for report in reports_orm:
+        angles = [
+            Angle(name=m.angle.name, value=m.value)
+            for m in report.measurements
+        ]
+
+        reports.append(
+            Report(
+                id=report.id,
+                name=report.name,
+                projectName=report.project.name if report.project else None,
+                patientId=report.patientid,
+                date=report.date,
+                imageCount=report.image_count,
+                projectId=report.projectid,
+                notes=report.notes,
+                angles=angles,
+            )
+        )
+
+    return reports
+
 
 # Endpoint para eliminar un reporte por id
 @router.delete("/{report_id}", response_model=Report)
