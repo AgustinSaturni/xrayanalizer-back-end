@@ -1,6 +1,6 @@
 from fastapi import APIRouter,Depends, HTTPException
 from db.database import SessionLocal
-from models.report import Angle, Report, ReportCreate,ReportUpdate
+from models.report import Angle, MeasurementORM, Report, ReportCreate,ReportUpdate
 from db.fake_db import projects
 from datetime import datetime
 from typing import List
@@ -17,6 +17,7 @@ def get_db():
     finally:
         db.close()
 
+# Endpoint para obtener todos los reportes
 @router.get("/", response_model=List[Report])
 def get_all_reports(db: Session = Depends(get_db)):
     reports_orm = db.query(ReportORM).all()
@@ -108,29 +109,45 @@ def get_reports_by_project_id(project_id: int, db: Session = Depends(get_db)):
 
 # Endpoint para eliminar un reporte por id
 @router.delete("/{report_id}", response_model=Report)
-def delete_report(report_id: int):
+def delete_report(report_id: int, db: Session = Depends(get_db)):
+    # Buscar el reporte en la base
+    report = db.query(ReportORM).filter(ReportORM.id == report_id).first()
 
-    global reports  # para poder modificar la lista
-
-    # Buscar el índice del reporte
-    report_index = next((i for i, r in enumerate(reports) if r.id == report_id), None)
-
-    if report_index is None:
+    if not report:
         raise HTTPException(status_code=404, detail="Reporte no encontrado")
 
-    # Guardar el reporte eliminado
-    deleted_report = reports[report_index]
+    # Crear el objeto Report a retornar (antes de eliminarlo)
+    angles = [
+        Angle(name=m.angle.name, value=m.value)
+        for m in report.measurements
+    ]
+    deleted_report = Report(
+        id=report.id,
+        name=report.name,
+        projectName=report.project.name if report.project else None,
+        patientId=report.patientid,
+        date=report.date,
+        imageCount=report.image_count,
+        projectId=report.projectid,
+        notes=report.notes,
+        angles=angles,
+    )
+
+    # Eliminar mediciones asociadas
+    db.query(MeasurementORM).filter(MeasurementORM.reportid == report.id).delete()
 
     # Eliminar el reporte
-    reports = [r for r in reports if r.id != report_id]
+    db.delete(report)
 
-    # Simular la actualización del contador de reportes del proyecto relacionado
-    for project in projects:
-        if project.id == deleted_report.projectId and project.reportCount > 0:
-            project.reportCount -= 1
-            break
+    # Decrementar el contador si corresponde
+    if report.project and report.project.report_count > 0:
+        report.project.report_count -= 1
+
+    # Confirmar todos los cambios
+    db.commit()
 
     return deleted_report
+
 
 # Endpoint para crear un reporte
 @router.post("", response_model=int)
