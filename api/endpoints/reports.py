@@ -1,7 +1,8 @@
 from fastapi import APIRouter,Depends, HTTPException
 from db.database import SessionLocal
-from models.report import Angle, MeasurementORM, Report, ReportCreate,ReportUpdate
-from db.fake_db import projects
+from models.project import ProjectORM
+from models.report import Angle, AngleORM, MeasurementORM, Report, ReportCreate,ReportUpdate
+from db.fake_db import projects,reports
 from datetime import datetime
 from typing import List
 from models.report import Report, ReportORM
@@ -173,19 +174,75 @@ def create_report(report_data: ReportCreate):
     return new_id
 
 # Endpoint para editar un reporte
-@router.put("/{id}")
-def update_report(id: int, report_data: ReportUpdate):
-    for index, report in enumerate(reports):
-        if report.id == id:
-            updated_report_data = report.dict()
-            update_fields = report_data.dict(exclude_unset=True)
+@router.put("/{id}", response_model=Report)
+def update_report(id: int, report_data: ReportUpdate, db: Session = Depends(get_db)):
+    # Buscar el reporte existente
+    report = db.query(ReportORM).filter(ReportORM.id == id).first()
 
-            # Actualizamos solo los campos que vinieron en el body
-            updated_report_data.update(update_fields)
+    if not report:
+        raise HTTPException(status_code=404, detail="Reporte no encontrado")
 
-            # Creamos una nueva instancia para mantener validación
-            reports[index] = Report(**updated_report_data)
+    # Guardamos el ID del proyecto anterior (por si se cambia el proyecto)
+    old_project_id = report.projectid
 
-            return reports[index]
+    # Aplicar actualizaciones al objeto ReportORM
+    update_fields = report_data.dict(exclude_unset=True)
 
-    raise HTTPException(status_code=404, detail="Reporte no encontrado")
+    for field, value in update_fields.items():
+        if field == "angles":
+            continue  # Los angles se procesan aparte
+        setattr(report, field, value)
+
+    # Actualizar mediciones si vienen nuevas
+    if report_data.angles is not None:
+        # Eliminar mediciones actuales
+        db.query(MeasurementORM).filter(MeasurementORM.reportid == report.id).delete()
+
+        # Agregar nuevas mediciones
+        for angle in report_data.angles:
+            # Buscar el ángulo en la base
+            angle_obj = db.query(AngleORM).filter(AngleORM.name == angle.name).first()
+            if not angle_obj:
+                raise HTTPException(status_code=404, detail=f"Ángulo '{angle.name}' no encontrado")
+
+            new_measurement = MeasurementORM(
+                value=angle.value,
+                reportid=report.id,
+                angleid=angle_obj.id
+            )
+            db.add(new_measurement)
+
+    # Si cambió el proyecto, actualizar los contadores
+    new_project_id = report_data.projectId if report_data.projectId is not None else old_project_id
+
+    if old_project_id != new_project_id:
+        # Decrementar el contador del proyecto anterior
+        old_project = db.query(ProjectORM).filter(ProjectORM.id == old_project_id).first()
+        if old_project and old_project.report_count > 0:
+            old_project.report_count -= 1
+
+        # Incrementar el contador del nuevo proyecto
+        new_project = db.query(ProjectORM).filter(ProjectORM.id == new_project_id).first()
+        if new_project:
+            new_project.report_count += 1
+
+    db.commit()
+    db.refresh(report)
+
+    # Armar el response con las mediciones actualizadas
+    angles = [
+        Angle(name=m.angle.name, value=m.value)
+        for m in report.measurements
+    ]
+
+    return Report(
+        id=report.id,
+        name=report.name,
+        projectName=report.project.name if report.project else None,
+        patientId=report.patientid,
+        date=report.date,
+        imageCount=report.image_count,
+        projectId=report.projectid,
+        notes=report.notes,
+        angles=angles,
+    )
