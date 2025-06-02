@@ -1,4 +1,4 @@
-from tkinter import Image
+from models.image import Image 
 from typing import List
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from sqlalchemy.orm import Session
@@ -7,7 +7,6 @@ import base64
 from api.endpoints.projects import get_db
 from models.image import ImageORM
 from models.project import ProjectORM
-
 
 router = APIRouter()
 
@@ -43,4 +42,14 @@ async def upload_image(file: UploadFile = File(...), projectId: str = Form(...),
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/project/{project_id}", response_model=List[Image])
+def get_project_images(project_id: int, db: Session = Depends(get_db)):
+    # Verificar si el proyecto existe
+    project = db.query(ProjectORM).filter(ProjectORM.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
 
+    # Consultar imágenes del proyecto
+    images = db.query(ImageORM).filter(ImageORM.projectId == project_id).all()
+
+    return images
