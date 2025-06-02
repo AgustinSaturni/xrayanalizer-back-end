@@ -19,6 +19,8 @@ class ProjectORM(Base):
     report_count = Column(Integer, default=0)
 
     reports = relationship("ReportORM", back_populates="project")
+    images = relationship("ImageORM", back_populates="project", cascade="all, delete")
+
 
 class ProjectCreate(BaseModel):
     name: str
