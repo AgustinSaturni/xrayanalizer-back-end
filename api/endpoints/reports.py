@@ -161,7 +161,7 @@ def create_report(report_data: ReportCreate, db: Session = Depends(get_db)):
     new_report = ReportORM(
         name=report_data.name,
         patientid=report_data.patientId,
-        date=report_data.date or date.today(),  # Usa la fecha del request o la actual
+        date=report_data.date or date.today(),
         image_count=report_data.imageCount,
         notes=report_data.notes,
         projectid=report_data.projectId
@@ -169,13 +169,29 @@ def create_report(report_data: ReportCreate, db: Session = Depends(get_db)):
 
     db.add(new_report)
     db.commit()
-    db.refresh(new_report)
+    db.refresh(new_report)  # Obtener el ID generado
 
-    # Actualizar el contador de reportes en el proyecto
+    # Crear mediciones (Measurements)
+    for angle in report_data.angles:
+        # Buscar el ángulo en la tabla angulo
+        angle_orm = db.query(AngleORM).filter(AngleORM.name == angle.name).first()
+        if not angle_orm:
+            raise HTTPException(status_code=400, detail=f"Ángulo '{angle.name}' no encontrado")
+
+        measurement = MeasurementORM(
+            value=angle.value,
+            date=report_data.date,
+            angleid=angle_orm.id,
+            reportid=new_report.id
+        )
+        db.add(measurement)
+
+    # Actualizar contador de reportes del proyecto
     project.report_count = (project.report_count or 0) + 1
     db.commit()
 
     return new_report.id
+
 
 # Endpoint para editar un reporte
 @router.put("/{id}", response_model=Report)
