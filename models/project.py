@@ -45,6 +45,6 @@ class ProjectUpdate(BaseModel):
     name: Optional[str] = None
     patientId: Optional[str] = None
     description: Optional[str] = None
-    date: Optional[str] = None
-    imageCount: Optional[dt_date] = None
+    date: Optional[dt_date] = None
+    imageCount: Optional[int] = None
     reportCount: Optional[int] = None
