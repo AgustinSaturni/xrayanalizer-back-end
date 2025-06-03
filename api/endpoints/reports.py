@@ -3,7 +3,7 @@ from db.database import SessionLocal
 from models.project import ProjectORM
 from models.report import Angle, AngleORM, MeasurementORM, Report, ReportCreate,ReportUpdate
 from db.fake_db import projects,reports
-from datetime import datetime
+from datetime import date, datetime
 from typing import List
 from models.report import Report, ReportORM
 from sqlalchemy.orm import Session
@@ -150,28 +150,32 @@ def delete_report(report_id: int, db: Session = Depends(get_db)):
     return deleted_report
 
 
-# Endpoint para crear un reporte
 @router.post("", response_model=int)
-def create_report(report_data: ReportCreate):
-    # Generar nuevo ID único
-    new_id = max([r.id for r in reports], default=0) + 1
+def create_report(report_data: ReportCreate, db: Session = Depends(get_db)):
+    # Verificar si el proyecto existe
+    project = db.query(ProjectORM).filter(ProjectORM.id == report_data.projectId).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
 
-    # Crear nuevo objeto Report
-    new_report = Report(
-        id=new_id,
-        date=datetime.now().strftime("%d/%m/%Y"),  # formato "es-ES"
-        **report_data.dict()
+    # Crear el nuevo reporte
+    new_report = ReportORM(
+        name=report_data.name,
+        patientid=report_data.patientId,
+        date=report_data.date or date.today(),  # Usa la fecha del request o la actual
+        image_count=report_data.imageCount,
+        notes=report_data.notes,
+        projectid=report_data.projectId
     )
 
-    reports.append(new_report)
+    db.add(new_report)
+    db.commit()
+    db.refresh(new_report)
 
-    # Actualizar el contador de reportes en el proyecto relacionado
-    for project in projects:
-        if project.id == report_data.projectId:
-            project.reportCount = getattr(project, "reportCount", 0) + 1
-            break
+    # Actualizar el contador de reportes en el proyecto
+    project.report_count = (project.report_count or 0) + 1
+    db.commit()
 
-    return new_id
+    return new_report.id
 
 # Endpoint para editar un reporte
 @router.put("/{id}", response_model=Report)

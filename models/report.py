@@ -15,7 +15,6 @@ class ReportORM(Base):
     date = Column(Date, nullable=False)
     description = Column(String)
     image_count = Column(Integer, default=0)
-    report_count = Column(Integer, default=0)
     projectid = Column(Integer, ForeignKey("proyecto.id"), nullable=False)
     notes = Column(String)
 
