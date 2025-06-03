@@ -11,7 +11,7 @@ from models.project import ProjectORM
 router = APIRouter()
 
 @router.post("/upload", response_model=str)
-async def upload_image(file: UploadFile = File(...), projectId: str = Form(...), db: Session = Depends(get_db)):
+async def upload_image(file: UploadFile = File(...), projectId: int = Form(...), db: Session = Depends(get_db)):
     try:
         # Verificar si el proyecto existe
         project = db.query(ProjectORM).filter(ProjectORM.id == int(projectId)).first()
