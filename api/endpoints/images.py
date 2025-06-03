@@ -53,3 +53,37 @@ def get_project_images(project_id: int, db: Session = Depends(get_db)):
     images = db.query(ImageORM).filter(ImageORM.projectId == project_id).all()
 
     return images
+
+@router.delete("/project/{project_id}/images", status_code=204)
+def delete_project_images(project_id: int, db: Session = Depends(get_db)):
+    # Verificar si el proyecto existe
+    project = db.query(ProjectORM).filter(ProjectORM.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+
+    # Obtener imágenes asociadas al proyecto
+    images = db.query(ImageORM).filter(ImageORM.projectId == project_id).all()
+
+    if not images:
+        raise HTTPException(status_code=404, detail="No hay imágenes asociadas a este proyecto")
+
+    # Eliminar las imágenes
+    for image in images:
+        db.delete(image)
+    
+    db.commit()
+
+    return  # status 204: No Content
+
+@router.delete("/images/{image_id}", status_code=204)
+def delete_image_by_id(image_id: int, db: Session = Depends(get_db)):
+    # Buscar la imagen por ID
+    image = db.query(ImageORM).filter(ImageORM.id == image_id).first()
+    if not image:
+        raise HTTPException(status_code=404, detail="Imagen no encontrada")
+
+    # Eliminar la imagen
+    db.delete(image)
+    db.commit()
+
+    return  # status 204: No Content
