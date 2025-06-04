@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException,Depends
 from models.project import Project, ProjectCreate, ProjectUpdate
-from db.fake_db import projects
 from datetime import date, datetime
 import time
 from sqlalchemy.orm import Session
@@ -27,7 +26,7 @@ def create_project(project_data: ProjectCreate, db: Session = Depends(get_db)):
     # Crear instancia del modelo ORM
     new_project = ProjectORM(
         name=project_data.name,
-        patient_id=project_data.patientId,
+        patientId=project_data.patientId,
         description=project_data.description,
         date=date.today(),  # fecha de hoy como objeto date
         image_count=0,
@@ -43,18 +42,18 @@ def create_project(project_data: ProjectCreate, db: Session = Depends(get_db)):
     return str(new_project.id)
 
 # 🆕 Obtener un proyecto por ID
-@router.get("/{project_id}", response_model=Project)
-def get_project_by_id(project_id: int, db: Session = Depends(get_db)):
-    project = db.query(ProjectORM).filter(ProjectORM.id == project_id).first()
+@router.get("/{projectId}", response_model=Project)
+def get_project_by_id(projectId: int, db: Session = Depends(get_db)):
+    project = db.query(ProjectORM).filter(ProjectORM.id == projectId).first()
     if project is None:
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
     return project
 
 # 🆕 Actualizar un proyecto por ID
-@router.put("/{project_id}", response_model=Project)
-def update_project(project_id: int, project_data: ProjectUpdate, db: Session = Depends(get_db)):
+@router.put("/{projectId}", response_model=Project)
+def update_project(projectId: int, project_data: ProjectUpdate, db: Session = Depends(get_db)):
     # Buscar proyecto existente
-    project = db.query(ProjectORM).filter(ProjectORM.id == project_id).first()
+    project = db.query(ProjectORM).filter(ProjectORM.id == projectId).first()
     if not project:
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
 
@@ -69,14 +68,14 @@ def update_project(project_id: int, project_data: ProjectUpdate, db: Session = D
     return project
 
 # 🗑️ Eliminar un proyecto por ID
-@router.delete("/{project_id}", response_model=bool)
-def delete_project(project_id: int, db: Session = Depends(get_db)):
-    print("Eliminando proyecto con ID:", project_id)
+@router.delete("/{projectId}", response_model=bool)
+def delete_project(projectId: int, db: Session = Depends(get_db)):
+    print("Eliminando proyecto con ID:", projectId)
 
-    project = db.query(ProjectORM).filter(ProjectORM.id == project_id).first()
+    project = db.query(ProjectORM).filter(ProjectORM.id == projectId).first()
 
     if not project:
-        print("Proyecto no encontrado para eliminar con ID:", project_id)
+        print("Proyecto no encontrado para eliminar con ID:", projectId)
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
 
     db.delete(project)

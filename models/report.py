@@ -11,11 +11,11 @@ class ReportORM(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    patientid = Column(String, nullable=False)
+    patientId = Column(String, nullable=False)
     date = Column(Date, nullable=False)
     description = Column(String)
     image_count = Column(Integer, default=0)
-    projectid = Column(Integer, ForeignKey("proyecto.id"), nullable=False)
+    projectId = Column(Integer, ForeignKey("proyecto.id"), nullable=False)
     notes = Column(String)
 
     # Relaciones
@@ -30,8 +30,8 @@ class MeasurementORM(Base):
     id = Column(Integer, primary_key=True, index=True)
     value = Column(String, nullable=False)
     date = Column(Date)
-    angleid = Column(Integer, ForeignKey("angulo.id"), nullable=False)
-    reportid = Column(Integer, ForeignKey("reporte.id"), nullable=False)
+    angleId = Column(Integer, ForeignKey("angulo.id"), nullable=False)
+    reportId = Column(Integer, ForeignKey("reporte.id"), nullable=False)
 
     # Relaciones
     report = relationship("ReportORM", back_populates="measurements")
@@ -52,10 +52,10 @@ class Report(BaseModel):
     id: int
     name: str
     projectName: Optional[str] = None
-    patientId: str = Field(..., alias="patientid")
+    patientId: str
     date: dt_date
     imageCount: int = Field(..., alias="image_count")
-    projectId: int = Field(..., alias="projectid")
+    projectId: int
     angles: List[Angle]
     notes: Optional[str] = None
 

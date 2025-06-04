@@ -12,7 +12,7 @@ class ProjectORM(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    patient_id = Column(String, nullable=False)
+    patientId = Column(String, nullable=False)
     date = Column(Date, nullable=False)
     description = Column(String)
     image_count = Column(Integer, default=0)
@@ -24,13 +24,13 @@ class ProjectORM(Base):
 
 class ProjectCreate(BaseModel):
     name: str
-    patientId: str = Field(..., alias="patient_id")
+    patientId: str
     description: str
 
 class Project(BaseModel):
     id: int
     name: str
-    patient_id: str = Field(..., alias="patientId")
+    patientId: str
     description: str
     date: dt_date
     image_count: int = Field(..., alias="imageCount")

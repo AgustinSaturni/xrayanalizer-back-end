@@ -2,7 +2,6 @@ from fastapi import APIRouter,Depends, HTTPException
 from db.database import SessionLocal
 from models.project import ProjectORM
 from models.report import Angle, AngleORM, MeasurementORM, Report, ReportCreate,ReportUpdate
-from db.fake_db import projects,reports
 from datetime import date, datetime
 from typing import List
 from models.report import Report, ReportORM
@@ -19,7 +18,7 @@ def get_db():
         db.close()
 
 # Endpoint para obtener todos los reportes
-@router.get("/", response_model=List[Report])
+@router.get("", response_model=List[Report])
 def get_all_reports(db: Session = Depends(get_db)):
     reports_orm = db.query(ReportORM).all()
     
@@ -38,7 +37,7 @@ def get_all_reports(db: Session = Depends(get_db)):
                 id=report.id,
                 name=report.name,
                 projectName=report.project.name if report.project else None,
-                patientId=report.patientid,
+                patientid=report.patientid,
                 date=report.date,
                 imageCount=report.image_count,
                 projectId=report.projectid,
@@ -67,7 +66,7 @@ def get_report_by_id(report_id: int, db: Session = Depends(get_db)):
         id=report.id,
         name=report.name,
         projectName=report.project.name if report.project else None,
-        patientId=report.patientid,
+        patientid=report.patientid,
         date=report.date,
         imageCount=report.image_count,
         projectId=report.projectid,
@@ -96,7 +95,7 @@ def get_reports_by_project_id(project_id: int, db: Session = Depends(get_db)):
                 id=report.id,
                 name=report.name,
                 projectName=report.project.name if report.project else None,
-                patientId=report.patientid,
+                patientid=report.patientid,
                 date=report.date,
                 imageCount=report.image_count,
                 projectId=report.projectid,
@@ -126,7 +125,7 @@ def delete_report(report_id: int, db: Session = Depends(get_db)):
         id=report.id,
         name=report.name,
         projectName=report.project.name if report.project else None,
-        patientId=report.patientid,
+        patientid=report.patientid,
         date=report.date,
         imageCount=report.image_count,
         projectId=report.projectid,
@@ -160,7 +159,7 @@ def create_report(report_data: ReportCreate, db: Session = Depends(get_db)):
     # Crear el nuevo reporte
     new_report = ReportORM(
         name=report_data.name,
-        patientid=report_data.patientId,
+        patientid=report_data.patientid,
         date=report_data.date or date.today(),
         image_count=report_data.imageCount,
         notes=report_data.notes,
@@ -206,8 +205,8 @@ def update_report(id: int, report_data: ReportUpdate, db: Session = Depends(get_
     old_project_id = report.projectid
 
     # Aplicar actualizaciones al objeto ReportORM
-    update_fields = report_data.dict(exclude_unset=True)
-
+    update_fields = report_data.dict(exclude_unset=True, by_alias=False)
+    print("Campos a actualizar:", update_fields)
     for field, value in update_fields.items():
         if field == "angles":
             continue  # Los angles se procesan aparte
@@ -259,7 +258,7 @@ def update_report(id: int, report_data: ReportUpdate, db: Session = Depends(get_
         id=report.id,
         name=report.name,
         projectName=report.project.name if report.project else None,
-        patientId=report.patientid,
+        patientid=report.patientid,
         date=report.date,
         imageCount=report.image_count,
         projectId=report.projectid,
