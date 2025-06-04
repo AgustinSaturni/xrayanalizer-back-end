@@ -37,10 +37,10 @@ def get_all_reports(db: Session = Depends(get_db)):
                 id=report.id,
                 name=report.name,
                 projectName=report.project.name if report.project else None,
-                patientid=report.patientid,
+                patientId=report.patientId,
                 date=report.date,
-                imageCount=report.image_count,
-                projectId=report.projectid,
+                imageCount=report.imageCount,
+                projectId=report.projectId,
                 notes=report.notes,
                 angles=angles,
             )
@@ -66,19 +66,19 @@ def get_report_by_id(report_id: int, db: Session = Depends(get_db)):
         id=report.id,
         name=report.name,
         projectName=report.project.name if report.project else None,
-        patientid=report.patientid,
+        patientId=report.patientId,
         date=report.date,
-        imageCount=report.image_count,
-        projectId=report.projectid,
+        imageCount=report.imageCount,
+        projectId=report.projectId,
         notes=report.notes,
         angles=angles,
     )
 
 
 # Endpoint para obtener todos los reportes asociados a un proyecto id
-@router.get("/by_project/{project_id}", response_model=List[Report])
-def get_reports_by_project_id(project_id: int, db: Session = Depends(get_db)):
-    reports_orm = db.query(ReportORM).filter(ReportORM.projectid == project_id).all()
+@router.get("/by_project/{projectId}", response_model=List[Report])
+def get_reports_by_project_id(projectId: int, db: Session = Depends(get_db)):
+    reports_orm = db.query(ReportORM).filter(ReportORM.projectId == projectId).all()
 
     if not reports_orm:
         raise HTTPException(status_code=404, detail="No hay reportes para este proyecto")
@@ -95,10 +95,10 @@ def get_reports_by_project_id(project_id: int, db: Session = Depends(get_db)):
                 id=report.id,
                 name=report.name,
                 projectName=report.project.name if report.project else None,
-                patientid=report.patientid,
+                patientId=report.patientId,
                 date=report.date,
-                imageCount=report.image_count,
-                projectId=report.projectid,
+                imageCount=report.imageCount,
+                projectId=report.projectId,
                 notes=report.notes,
                 angles=angles,
             )
@@ -125,23 +125,23 @@ def delete_report(report_id: int, db: Session = Depends(get_db)):
         id=report.id,
         name=report.name,
         projectName=report.project.name if report.project else None,
-        patientid=report.patientid,
+        patientId=report.patientId,
         date=report.date,
-        imageCount=report.image_count,
-        projectId=report.projectid,
+        imageCount=report.imageCount,
+        projectId=report.projectId,
         notes=report.notes,
         angles=angles,
     )
 
     # Eliminar mediciones asociadas
-    db.query(MeasurementORM).filter(MeasurementORM.reportid == report.id).delete()
+    db.query(MeasurementORM).filter(MeasurementORM.reportId == report.id).delete()
 
     # Eliminar el reporte
     db.delete(report)
 
     # Decrementar el contador si corresponde
-    if report.project and report.project.report_count > 0:
-        report.project.report_count -= 1
+    if report.project and report.project.reportCount > 0:
+        report.project.reportCount -= 1
 
     # Confirmar todos los cambios
     db.commit()
@@ -159,11 +159,11 @@ def create_report(report_data: ReportCreate, db: Session = Depends(get_db)):
     # Crear el nuevo reporte
     new_report = ReportORM(
         name=report_data.name,
-        patientid=report_data.patientid,
+        patientId=report_data.patientId,
         date=report_data.date or date.today(),
-        image_count=report_data.imageCount,
+        imageCount=report_data.imageCount,
         notes=report_data.notes,
-        projectid=report_data.projectId
+        projectId=report_data.projectId
     )
 
     db.add(new_report)
@@ -180,13 +180,13 @@ def create_report(report_data: ReportCreate, db: Session = Depends(get_db)):
         measurement = MeasurementORM(
             value=angle.value,
             date=report_data.date,
-            angleid=angle_orm.id,
-            reportid=new_report.id
+            angleId=angle_orm.id,
+            reportId=new_report.id
         )
         db.add(measurement)
 
     # Actualizar contador de reportes del proyecto
-    project.report_count = (project.report_count or 0) + 1
+    project.reportCount = (project.reportCount or 0) + 1
     db.commit()
 
     return new_report.id
@@ -202,7 +202,7 @@ def update_report(id: int, report_data: ReportUpdate, db: Session = Depends(get_
         raise HTTPException(status_code=404, detail="Reporte no encontrado")
 
     # Guardamos el ID del proyecto anterior (por si se cambia el proyecto)
-    old_project_id = report.projectid
+    old_project_id = report.projectId
 
     # Aplicar actualizaciones al objeto ReportORM
     update_fields = report_data.dict(exclude_unset=True, by_alias=False)
@@ -215,7 +215,7 @@ def update_report(id: int, report_data: ReportUpdate, db: Session = Depends(get_
     # Actualizar mediciones si vienen nuevas
     if report_data.angles is not None:
         # Eliminar mediciones actuales
-        db.query(MeasurementORM).filter(MeasurementORM.reportid == report.id).delete()
+        db.query(MeasurementORM).filter(MeasurementORM.reportId == report.id).delete()
 
         # Agregar nuevas mediciones
         for angle in report_data.angles:
@@ -226,8 +226,8 @@ def update_report(id: int, report_data: ReportUpdate, db: Session = Depends(get_
 
             new_measurement = MeasurementORM(
                 value=angle.value,
-                reportid=report.id,
-                angleid=angle_obj.id
+                reportId=report.id,
+                angleId=angle_obj.id
             )
             db.add(new_measurement)
 
@@ -237,13 +237,13 @@ def update_report(id: int, report_data: ReportUpdate, db: Session = Depends(get_
     if old_project_id != new_project_id:
         # Decrementar el contador del proyecto anterior
         old_project = db.query(ProjectORM).filter(ProjectORM.id == old_project_id).first()
-        if old_project and old_project.report_count > 0:
-            old_project.report_count -= 1
+        if old_project and old_project.reportCount > 0:
+            old_project.reportCount -= 1
 
         # Incrementar el contador del nuevo proyecto
         new_project = db.query(ProjectORM).filter(ProjectORM.id == new_project_id).first()
         if new_project:
-            new_project.report_count += 1
+            new_project.reportCount += 1
 
     db.commit()
     db.refresh(report)
@@ -258,10 +258,10 @@ def update_report(id: int, report_data: ReportUpdate, db: Session = Depends(get_
         id=report.id,
         name=report.name,
         projectName=report.project.name if report.project else None,
-        patientid=report.patientid,
+        patientId=report.patientId,
         date=report.date,
-        imageCount=report.image_count,
-        projectId=report.projectid,
+        imageCount=report.imageCount,
+        projectId=report.projectId,
         notes=report.notes,
         angles=angles,
     )
