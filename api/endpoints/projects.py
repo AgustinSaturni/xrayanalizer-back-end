@@ -29,8 +29,8 @@ def create_project(project_data: ProjectCreate, db: Session = Depends(get_db)):
         patientId=project_data.patientId,
         description=project_data.description,
         date=date.today(),  # fecha de hoy como objeto date
-        image_count=0,
-        report_count=0
+        imageCount=0,
+        reportCount=0
     )
     
     # Agregar y guardar en base de datos

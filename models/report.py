@@ -14,7 +14,7 @@ class ReportORM(Base):
     patientId = Column(String, nullable=False)
     date = Column(Date, nullable=False)
     description = Column(String)
-    image_count = Column(Integer, default=0)
+    imageCount = Column(Integer, default=0)
     projectId = Column(Integer, ForeignKey("proyecto.id"), nullable=False)
     notes = Column(String)
 
@@ -54,7 +54,7 @@ class Report(BaseModel):
     projectName: Optional[str] = None
     patientId: str
     date: dt_date
-    imageCount: int = Field(..., alias="image_count")
+    imageCount: int
     projectId: int
     angles: List[Angle]
     notes: Optional[str] = None

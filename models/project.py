@@ -15,8 +15,8 @@ class ProjectORM(Base):
     patientId = Column(String, nullable=False)
     date = Column(Date, nullable=False)
     description = Column(String)
-    image_count = Column(Integer, default=0)
-    report_count = Column(Integer, default=0)
+    imageCount = Column(Integer, default=0)
+    reportCount = Column(Integer, default=0)
 
     reports = relationship("ReportORM", back_populates="project")
     images = relationship("ImageORM", back_populates="project", cascade="all, delete")
@@ -33,8 +33,8 @@ class Project(BaseModel):
     patientId: str
     description: str
     date: dt_date
-    image_count: int = Field(..., alias="imageCount")
-    report_count: int = Field(..., alias="reportCount")
+    reportCount: int
+    imageCount: int
 
     class Config:
         from_attributes = True
