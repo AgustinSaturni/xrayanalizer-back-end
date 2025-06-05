@@ -10,6 +10,7 @@ from models.project import ProjectORM
 
 router = APIRouter()
 
+#Alta de imagen
 @router.post("/upload", response_model=str)
 async def upload_image(file: UploadFile = File(...), projectId: int = Form(...), db: Session = Depends(get_db)):
     try:
@@ -31,8 +32,11 @@ async def upload_image(file: UploadFile = File(...), projectId: int = Form(...),
             size=len(content),
             uploadedat=datetime.utcnow().date(),  # La columna es tipo DATE
         )
-
         db.add(new_image)
+
+        # 🟢 Incrementar el contador de imágenes del proyecto
+        project.imageCount = (project.imageCount or 0) + 1
+
         db.commit()
         db.refresh(new_image)
 
@@ -42,6 +46,7 @@ async def upload_image(file: UploadFile = File(...), projectId: int = Form(...),
         raise HTTPException(status_code=500, detail=str(e))
 
 
+#GetAll de imagenes de un proyecto
 @router.get("/project/{project_id}", response_model=List[Image])
 def get_project_images(project_id: int, db: Session = Depends(get_db)):
     # Verificar si el proyecto existe
@@ -54,6 +59,7 @@ def get_project_images(project_id: int, db: Session = Depends(get_db)):
 
     return images
 
+#Delete de todas las imagenes de un proyecto
 @router.delete("/project/{project_id}/images", status_code=204)
 def delete_project_images(project_id: int, db: Session = Depends(get_db)):
     # Verificar si el proyecto existe
@@ -70,17 +76,25 @@ def delete_project_images(project_id: int, db: Session = Depends(get_db)):
     # Eliminar las imágenes
     for image in images:
         db.delete(image)
-    
-    db.commit()
 
+    # 🟢 Restar el contador de imágenes
+    project.imageCount = max((project.imageCount or 0) - len(images), 0)
+
+    db.commit()
     return  # status 204: No Content
 
+#Delete de una imagen por id
 @router.delete("/images/{image_id}", status_code=204)
 def delete_image_by_id(image_id: int, db: Session = Depends(get_db)):
     # Buscar la imagen por ID
     image = db.query(ImageORM).filter(ImageORM.id == image_id).first()
     if not image:
         raise HTTPException(status_code=404, detail="Imagen no encontrada")
+
+    # Obtener el proyecto relacionado
+    project = db.query(ProjectORM).filter(ProjectORM.id == image.projectId).first()
+    if project and project.imageCount > 0:
+        project.imageCount -= 1
 
     # Eliminar la imagen
     db.delete(image)
