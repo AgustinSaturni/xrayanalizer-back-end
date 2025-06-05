@@ -3,5 +3,3 @@ uvicorn
 python-multipart
 pydantic
 aiofiles
-sqlalchemy
-psycopg2-binary
