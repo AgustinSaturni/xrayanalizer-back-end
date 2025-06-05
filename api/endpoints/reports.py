@@ -80,9 +80,7 @@ def get_report_by_id(report_id: int, db: Session = Depends(get_db)):
 def get_reports_by_project_id(projectId: int, db: Session = Depends(get_db)):
     reports_orm = db.query(ReportORM).filter(ReportORM.projectId == projectId).all()
 
-    if not reports_orm:
-        raise HTTPException(status_code=404, detail="No hay reportes para este proyecto")
-
+    # Ya no lanzamos excepción si no hay reportes, devolvemos []
     reports = []
     for report in reports_orm:
         angles = [
@@ -105,7 +103,6 @@ def get_reports_by_project_id(projectId: int, db: Session = Depends(get_db)):
         )
 
     return reports
-
 
 # Endpoint para eliminar un reporte por id
 @router.delete("/{report_id}", response_model=Report)
