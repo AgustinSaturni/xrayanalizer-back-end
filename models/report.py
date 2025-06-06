@@ -20,7 +20,7 @@ class ReportORM(Base):
 
     # Relaciones
     project = relationship("ProjectORM", back_populates="reports")
-    measurements = relationship("MeasurementORM", back_populates="report")
+    measurements = relationship("MeasurementORM", back_populates="report",cascade="all, delete-orphan")
 
 
 

@@ -18,7 +18,7 @@ class ProjectORM(Base):
     imageCount = Column(Integer, default=0)
     reportCount = Column(Integer, default=0)
 
-    reports = relationship("ReportORM", back_populates="project")
+    reports = relationship("ReportORM", back_populates="project",cascade="all, delete-orphan")
     images = relationship("ImageORM", back_populates="project", cascade="all, delete")
 
 
