@@ -12,7 +12,7 @@ class ImageORM(Base):
     name = Column(String)
     url = Column(String)
     size = Column(Integer)
-    uploadedat = Column(Date)
+    uploadedDate = Column(Date)
     # Relación con Proyecto
     project = relationship("ProjectORM", back_populates="images")
 
@@ -21,7 +21,7 @@ class ImageCreate(BaseModel):
     name: str
     url: str
     size: int
-    uploadedat: date
+    uploadedDate: date
 
 class Image(BaseModel):
     id: int
@@ -29,7 +29,7 @@ class Image(BaseModel):
     name: str
     url: str
     size: int
-    uploadedat: datetime
+    uploadedDate: datetime
 
     class Config:
         from_attributes = True

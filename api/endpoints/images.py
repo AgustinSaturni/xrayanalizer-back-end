@@ -30,7 +30,7 @@ async def upload_image(file: UploadFile = File(...), projectId: int = Form(...),
             name=file.filename,
             url=data_url,
             size=len(content),
-            uploadedat=datetime.utcnow().date(),  # La columna es tipo DATE
+            uploadedDate=datetime.utcnow().date(),  # La columna es tipo DATE
         )
         db.add(new_image)
 
@@ -84,7 +84,7 @@ def delete_project_images(project_id: int, db: Session = Depends(get_db)):
     return  # status 204: No Content
 
 #Delete de una imagen por id
-@router.delete("/images/{image_id}", status_code=204)
+@router.delete("/{image_id}", response_model=Image, status_code=200)
 def delete_image_by_id(image_id: int, db: Session = Depends(get_db)):
     # Buscar la imagen por ID
     image = db.query(ImageORM).filter(ImageORM.id == image_id).first()
@@ -96,8 +96,19 @@ def delete_image_by_id(image_id: int, db: Session = Depends(get_db)):
     if project and project.imageCount > 0:
         project.imageCount -= 1
 
+    # Guardar una copia del contenido antes de eliminar
+    image_data = Image(
+        id=image.id,
+        name=image.name,
+        url=image.url,
+        projectId=image.projectId,
+        uploadedDate=image.uploadedDate,
+        size=image.size
+    )
+
     # Eliminar la imagen
     db.delete(image)
     db.commit()
 
-    return  # status 204: No Content
+    return image_data
+
