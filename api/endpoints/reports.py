@@ -21,9 +21,6 @@ def get_db():
 @router.get("", response_model=List[Report])
 def get_all_reports(db: Session = Depends(get_db)):
     reports_orm = db.query(ReportORM).all()
-    
-    if not reports_orm:
-        raise HTTPException(status_code=404, detail="No reports found")
 
     reports = []
     for report in reports_orm:
@@ -47,6 +44,7 @@ def get_all_reports(db: Session = Depends(get_db)):
         )
 
     return reports
+
 
 
 # Endpoint para obtener un reporte por id
