@@ -1,9 +1,14 @@
 # xrayanalizer-back-end
-Servicio hecho en FastApi para soportar consultas de la app XRayAnalizer
 
-Pasos para levantar el backend:
+## 🚀 Función
 
-1_python3 -m venv venv
-2_source venv/bin/activate
-3_pip install -r requirements.txt
-4_uvicorn main:app --reload
+Servicio desarrollado con **FastAPI** para brindar soporte al frontend de la aplicación **XRayAnalizer**, encargado de procesar solicitudes y comunicarse con la base de datos.
+
+---
+
+## 🧪 ¿Cómo levantarlo localmente?
+
+1. Clonar el repositorio:
+   ```bash
+   git clone <URL_DEL_REPO>
+   cd xrayanalizer-back-end
